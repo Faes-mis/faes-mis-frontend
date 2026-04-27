@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1b3a6b 0%, #2e75b6 100%);
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -44,9 +44,20 @@
         }
 
         .logo-section h1 {
-            color: #1b3a6b;
-            font-size: 28px;
+            color: #1b5e20;
+            font-size: 32px;
             margin-bottom: 5px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .logo-section .faculty-name {
+            color: #2e7d32;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .logo-section p {
@@ -83,13 +94,13 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #2e75b6;
+            border-color: #2e7d32;
         }
 
         .login-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #1b3a6b 0%, #2e75b6 100%);
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
             color: white;
             border: none;
             border-radius: 6px;
@@ -134,7 +145,7 @@
 
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #2e75b6;
+            border-top: 4px solid #2e7d32;
             border-radius: 50%;
             width: 30px;
             height: 30px;
@@ -168,7 +179,7 @@
         }
 
         .header h2 {
-            color: #1b3a6b;
+            color: #1b5e20;
             font-size: 24px;
         }
 
@@ -195,7 +206,7 @@
         }
 
         .profile-card {
-            background: linear-gradient(135deg, #1b3a6b 0%, #2e75b6 100%);
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
             color: white;
             padding: 25px;
             border-radius: 12px;
@@ -233,7 +244,7 @@
 
         .section-title {
             font-size: 20px;
-            color: #1b3a6b;
+            color: #1b5e20;
             margin-top: 30px;
             margin-bottom: 20px;
             font-weight: 600;
@@ -252,14 +263,14 @@
 
         .course-card {
             background: #f8f9fa;
-            border-left: 5px solid #2e75b6;
+            border-left: 5px solid #2e7d32;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .course-card h4 {
-            color: #1b3a6b;
+            color: #1b5e20;
             margin-bottom: 10px;
             font-size: 15px;
         }
@@ -272,7 +283,7 @@
 
         .course-code {
             display: inline-block;
-            background: #2e75b6;
+            background: #2e7d32;
             color: white;
             padding: 4px 10px;
             border-radius: 4px;
@@ -288,7 +299,7 @@
         }
 
         .results-table thead {
-            background: #1b3a6b;
+            background: #1b5e20;
             color: white;
         }
 
@@ -304,7 +315,7 @@
         }
 
         .results-table tbody tr:hover {
-            background: #e8f0fa;
+            background: #e8f5e9;
         }
 
         .grade-badge {
@@ -389,8 +400,8 @@
     <!-- LOGIN PAGE -->
     <div class="login-page" id="loginPage">
         <div class="logo-section">
-            <h1>?? FAES MIS</h1>
-            <p>Faculty of Agriculture & Environmental Science</p>
+            <h1>🎓 FAES MIS</h1>
+            <div class="faculty-name">Faculty of Agriculture & Environmental Science</div>
             <p style="margin-top: 10px; color: #999; font-size: 12px;">Metropolitan International University</p>
         </div>
 
@@ -445,7 +456,7 @@
         <div class="content">
             <!-- PROFILE CARD -->
             <div class="profile-card">
-                <h3>?? Your Profile</h3>
+                <h3>📋 Your Profile</h3>
                 <div class="profile-info">
                     <div class="profile-item">
                         <div class="profile-item-label">Registration Number</div>
@@ -475,7 +486,7 @@
             </div>
 
             <!-- COURSES SECTION -->
-            <h3 class="section-title">?? Your Courses</h3>
+            <h3 class="section-title">📚 Your Courses</h3>
             <div class="courses-grid" id="coursesContainer">
                 <div class="empty-state">
                     <p>No courses registered yet</p>
@@ -483,7 +494,7 @@
             </div>
 
             <!-- RESULTS SECTION -->
-            <h3 class="section-title">?? Your Results</h3>
+            <h3 class="section-title">📊 Your Results</h3>
             <div id="resultsContainer" style="overflow-x: auto;">
                 <div class="empty-state">
                     <p>No results available yet</p>
@@ -493,8 +504,9 @@
     </div>
 
     <script>
-        // Configuration
-        const API_BASE_URL = 'https://faes-mis-backend.onrender.com';
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://ikvepnyyrunraitvekat.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrdmVwbnl5cnVucmFpdHZla2F0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk0NTk1NzAsImV4cCI6MTkzNzAzNTU3MH0.8N8WBwx28wDEVFc__4qJ7V7eNDvYIzFOCf8WBpJMC3A';
 
         // DOM Elements
         const loginPage = document.getElementById('loginPage');
@@ -504,6 +516,28 @@
         const errorMessage = document.getElementById('errorMessage');
         const loading = document.getElementById('loading');
         const loginBtn = document.getElementById('loginBtn');
+
+        // Supabase API Helper
+        async function supabaseQuery(table, filters = {}) {
+            let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
+            
+            Object.keys(filters).forEach((key, index) => {
+                url += `&${key}=eq.${encodeURIComponent(filters[key])}`;
+            });
+
+            const response = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Supabase query failed: ${response.statusText}`);
+            }
+
+            return await response.json();
+        }
 
         // Login Handler
         loginForm.addEventListener('submit', async (e) => {
@@ -517,24 +551,20 @@
             loginBtn.disabled = true;
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/student-login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reg_no: regNo, password })
-                });
+                // Query student by registration number
+                const students = await supabaseQuery('students', { reg_no: regNo });
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Login failed');
+                if (students.length === 0) {
+                    throw new Error('Invalid registration number or password');
                 }
 
-                // Save token to localStorage
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('studentId', data.student.id);
+                const student = students[0];
+
+                // Store student data
+                localStorage.setItem('studentData', JSON.stringify(student));
 
                 // Load student data
-                await loadStudentData(data.student);
+                await loadStudentData(student);
 
                 // Show dashboard
                 loginPage.classList.add('hidden');
@@ -550,8 +580,7 @@
 
         // Logout Handler
         logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('studentId');
+            localStorage.removeItem('studentData');
             loginPage.classList.remove('hidden');
             dashboardPage.classList.remove('active');
             loginForm.reset();
@@ -567,62 +596,47 @@
             document.getElementById('profileSemester').textContent = `Semester ${student.semester}`;
             document.getElementById('profileEmail').textContent = student.email || 'N/A';
 
-            const token = localStorage.getItem('token');
-            const studentId = localStorage.getItem('studentId');
-
             // Load courses
-            await loadCourses(studentId, token);
+            await loadCourses(student.programme_id);
 
             // Load results
-            await loadResults(studentId, token);
+            await loadResults(student.id);
         }
 
         // Load Courses
-        async function loadCourses(studentId, token) {
+        async function loadCourses(programmeId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/student/${studentId}/courses`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!response.ok) throw new Error('Failed to load courses');
-
-                const data = await response.json();
+                const courses = await supabaseQuery('courses', { programme_id: programmeId });
                 const coursesContainer = document.getElementById('coursesContainer');
 
-                if (!data.courses || data.courses.length === 0) {
-                    coursesContainer.innerHTML = '<div class="empty-state"><p>No courses registered</p></div>';
+                if (!courses || courses.length === 0) {
+                    coursesContainer.innerHTML = '<div class="empty-state"><p>No courses found</p></div>';
                     return;
                 }
 
-                coursesContainer.innerHTML = data.courses.map(course => `
+                coursesContainer.innerHTML = courses.slice(0, 6).map(course => `
                     <div class="course-card">
                         <h4>${course.title}</h4>
                         <p><strong>${course.code}</strong></p>
                         <p>Credit Units: <strong>${course.credit_units}</strong></p>
-                        <p>Lecturer: ${course.lecturer_name || 'TBA'}</p>
                         <p style="margin-top: 10px;">
-                            <span class="course-code">${course.lecture_hours}h Lecture | ${course.practical_hours}h Practical</span>
+                            <span class="course-code">${course.lecture_hours || 0}h Lecture | ${course.practical_hours || 0}h Practical</span>
                         </p>
                     </div>
                 `).join('');
             } catch (error) {
                 console.error('Error loading courses:', error);
+                document.getElementById('coursesContainer').innerHTML = '<div class="empty-state"><p>Error loading courses</p></div>';
             }
         }
 
         // Load Results
-        async function loadResults(studentId, token) {
+        async function loadResults(studentId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/student/${studentId}/results`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!response.ok) throw new Error('Failed to load results');
-
-                const data = await response.json();
+                const results = await supabaseQuery('results', { student_id: studentId });
                 const resultsContainer = document.getElementById('resultsContainer');
 
-                if (!data.results || data.results.length === 0) {
+                if (!results || results.length === 0) {
                     resultsContainer.innerHTML = '<div class="empty-state"><p>No results available yet</p></div>';
                     return;
                 }
@@ -642,19 +656,15 @@
                     <thead>
                         <tr>
                             <th>Course Code</th>
-                            <th>Course Title</th>
-                            <th>Semester</th>
                             <th>Marks (%)</th>
                             <th>Grade</th>
                             <th>GPA Points</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${data.results.map(result => `
+                        ${results.map(result => `
                             <tr>
-                                <td><strong>${result.code}</strong></td>
-                                <td>${result.title}</td>
-                                <td>${result.academic_year} - Sem ${result.semester_no}</td>
+                                <td><strong>${result.course_id || 'N/A'}</strong></td>
                                 <td><strong>${result.marks ? result.marks.toFixed(2) : 'N/A'}</strong></td>
                                 <td>
                                     ${result.letter_grade ? `<span class="grade-badge ${getGradeClass(result.letter_grade)}">${result.letter_grade}</span>` : 'N/A'}
@@ -668,15 +678,16 @@
                 resultsContainer.appendChild(table);
             } catch (error) {
                 console.error('Error loading results:', error);
+                document.getElementById('resultsContainer').innerHTML = '<div class="empty-state"><p>Error loading results</p></div>';
             }
         }
 
         // Check if already logged in
         window.addEventListener('load', () => {
-            const token = localStorage.getItem('token');
-            const studentId = localStorage.getItem('studentId');
+            const studentData = localStorage.getItem('studentData');
 
-            if (token && studentId) {
+            if (studentData) {
+                const student = JSON.parse(studentData);
                 loginPage.classList.add('hidden');
                 dashboardPage.classList.add('active');
             }

@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAES MIS - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 12px 15px;
+            border-radius: 6px;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .logout-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #c33;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #1b5e20;
+            font-size: 28px;
+        }
+
+        .admin-info {
+            text-align: right;
+        }
+
+        .admin-info p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* DASHBOARD SECTIONS */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid #2e7d32;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            color: #1b5e20;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        /* TABLES */
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input,
+        .search-bar select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .search-bar input {
+            flex: 1;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: #f5f5f5;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-weight: 600;
+            color: #333;
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .btn-edit {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        /* FORMS */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-submit {
+            background: #2e7d32;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-submit:hover {
+            background: #1b5e20;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #1b5e20;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: #fdecea;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .pagination button {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background: #2e7d32;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <h2>🎓 FAES MIS</h2>
+            <ul class="sidebar-menu">
+                <li><a onclick="showSection('dashboard')" class="menu-link active">📊 Dashboard</a></li>
+                <li><a onclick="showSection('students')" class="menu-link">👥 Students</a></li>
+                <li><a onclick="showSection('results')" class="menu-link">📈 Results Entry</a></li>
+                <li><a onclick="showSection('courses')" class="menu-link">📚 Courses</a></li>
+                <li><a onclick="showSection('staff')" class="menu-link">👨‍🏫 Staff</a></li>
+                <li><a onclick="showSection('reports')" class="menu-link">📄 Reports</a></li>
+            </ul>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- HEADER -->
+            <div class="header">
+                <h1>Admin Dashboard</h1>
+                <div class="admin-info">
+                    <p>Welcome, <strong>Administrator</strong></p>
+                    <p id="currentTime"></p>
+                </div>
+            </div>
+
+            <!-- DASHBOARD SECTION -->
+            <div id="dashboard" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Students</h3>
+                        <div class="value" id="totalStudents">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Courses</h3>
+                        <div class="value" id="totalCourses">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Staff</h3>
+                        <div class="value" id="totalStaff">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Programmes</h3>
+                        <div class="value" id="totalProgrammes">-</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>📊 System Overview</h3>
+                    <p style="margin-top: 10px; color: #666;">
+                        Your FAES MIS system is running smoothly with students enrolled across multiple programmes. 
+                        Use the menu to manage students, enter results, and generate reports.
+                    </p>
+                </div>
+            </div>
+
+            <!-- STUDENTS SECTION -->
+            <div id="students" class="section">
+                <h2 style="margin-bottom: 20px; color: #1b5e20;">Student Management</h2>
+                
+                <div class="table-container">
+                    <div class="search-bar">
+                        <input type="text" id="studentSearch" placeholder="Search by name or registration number..." />
+                        <button onclick="searchStudents()">Search</button>
+                        <button onclick="openStudentModal()" style="background: #2e7d32;">+ Add Student</button>
+                    </div>
+
+                    <div class="success-message" id="successMessage"></div>
+                    <div class="error-message" id="errorMessage"></div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Reg No</th>
+                                <th>Full Name</th>
+                                <th>Programme</th>
+                                <th>Year</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <tr><td colspan="7" style="text-align: center; color: #999;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination" id="studentsPagination"></div>
+                </div>
+            </div>
+
+            <!-- RESULTS ENTRY SECTION -->
+            <div id="results" class="section">
+                <h2 style="margin-bottom: 20px; color: #1b5e20;">Results Entry</h2>
+                
+                <div class="table-container">
+                    <div class="search-bar">
+                        <select id="resultCourseFilter" onchange="filterResults()" style="flex: 1;">
+                            <option value="">Select Course...</option>
+                        </select>
+                        <select id="resultSemesterFilter" onchange="filterResults()" style="flex: 1;">
+                            <option value="">Select Semester...</option>
+                        </select>
+                        <button onclick="openResultModal()" style="background: #2e7d32;">+ Add Result</button>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Course</th>
+                                <th>Marks</th>
+                                <th>Grade</th>
+                                <th>GPA</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <tr><td colspan="6" style="text-align: center; color: #999;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- COURSES SECTION -->
+            <div id="courses" class="section">
+                <h2 style="margin-bottom: 20px; color: #1b5e20;">Course Management</h2>
+                
+                <div class="table-container">
+                    <div class="search-bar">
+                        <select id="programmeFilter" onchange="filterCourses()" style="flex: 1;">
+                            <option value="">All Programmes</option>
+                        </select>
+                        <button onclick="openCourseModal()" style="background: #2e7d32;">+ Add Course</button>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Title</th>
+                                <th>Programme</th>
+                                <th>Credit Units</th>
+                                <th>Lecture Hours</th>
+                                <th>Practical Hours</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                            <tr><td colspan="6" style="text-align: center; color: #999;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination" id="coursesPagination"></div>
+                </div>
+            </div>
+
+            <!-- STAFF SECTION -->
+            <div id="staff" class="section">
+                <h2 style="margin-bottom: 20px; color: #1b5e20;">Staff Management</h2>
+                
+                <div class="table-container">
+                    <div class="search-bar">
+                        <input type="text" id="staffSearch" placeholder="Search by name..." />
+                        <button onclick="searchStaff()">Search</button>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Staff No</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Teaching Days</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTableBody">
+                            <tr><td colspan="5" style="text-align: center; color: #999;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- REPORTS SECTION -->
+            <div id="reports" class="section">
+                <h2 style="margin-bottom: 20px; color: #1b5e20;">Reports & Analytics</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Students per Programme</h3>
+                        <div id="studentsPerProgramme" style="font-size: 14px; margin-top: 10px;"></div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average GPA</h3>
+                        <div class="value" id="avgGPA">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Results Entered</h3>
+                        <div class="value" id="totalResults">-</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h3 style="margin-bottom: 15px;">Student Performance Report</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Programme</th>
+                                <th>Courses Taken</th>
+                                <th>Average Mark</th>
+                                <th>GPA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performanceTableBody">
+                            <tr><td colspan="5" style="text-align: center; color: #999;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add/Edit Student</h2>
+                <button class="close-btn" onclick="closeStudentModal()">&times;</button>
+            </div>
+            <form id="studentForm" onsubmit="saveStudent(event)">
+                <div class="form-group">
+                    <label>Registration Number</label>
+                    <input type="text" id="regNo" required />
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" required />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="studentEmail" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="phone" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Programme</label>
+                        <select id="programmeId" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select id="gender" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Year of Study</label>
+                        <select id="yearOfStudy" required>
+                            <option value="1">Year 1</option>
+                            <option value="2">Year 2</option>
+                            <option value="3">Year 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Semester</label>
+                        <select id="semester" required>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Save Student</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add/Edit Result</h2>
+                <button class="close-btn" onclick="closeResultModal()">&times;</button>
+            </div>
+            <form id="resultForm" onsubmit="saveResult(event)">
+                <div class="form-group">
+                    <label>Student</label>
+                    <select id="studentId" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Course</label>
+                    <select id="courseId" required></select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Marks (0-100)</label>
+                        <input type="number" id="marks" min="0" max="100" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Semester</label>
+                        <select id="resultSemester" required>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Save Result</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ikvepnyyrunraitvekat.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_BR3NxW8vuJSOhrwbDHjNJA_NqmmQPbG';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let allStudents = [];
+        let allCourses = [];
+        let allStaff = [];
+        let allProgrammes = [];
+        let allResults = [];
+
+        // Initialize
+        window.addEventListener('load', async () => {
+            await loadAllData();
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+
+        async function loadAllData() {
+            try {
+                // Load students
+                const { data: students } = await supabase.from('students').select('*');
+                allStudents = students || [];
+
+                // Load courses
+                const { data: courses } = await supabase.from('courses').select('*');
+                allCourses = courses || [];
+
+                // Load staff
+                const { data: staff } = await supabase.from('staff').select('*');
+                allStaff = staff || [];
+
+                // Load programmes
+                const { data: programmes } = await supabase.from('programmes').select('*');
+                allProgrammes = programmes || [];
+
+                // Load results
+                const { data: results } = await supabase.from('results').select('*');
+                allResults = results || [];
+
+                // Update dashboard
+                document.getElementById('totalStudents').textContent = allStudents.length;
+                document.getElementById('totalCourses').textContent = allCourses.length;
+                document.getElementById('totalStaff').textContent = allStaff.length;
+                document.getElementById('totalProgrammes').textContent = allProgrammes.length;
+
+                // Populate dropdowns
+                populateProgrammeDropdowns();
+                populateStudentDropdowns();
+                populateCourseDropdowns();
+
+                // Load tables
+                loadStudentsTable();
+                loadCoursesTable();
+                loadStaffTable();
+                loadResultsTable();
+                loadReports();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function populateProgrammeDropdowns() {
+            const selects = document.querySelectorAll('#programmeId, #programmeFilter, #resultCourseFilter');
+            selects.forEach(select => {
+                if (select.id === 'programmeFilter' || select.id === 'resultCourseFilter') return;
+                select.innerHTML = '<option value="">Select Programme</option>';
+                allProgrammes.forEach(prog => {
+                    select.innerHTML += `<option value="${prog.id}">${prog.code}</option>`;
+                });
+            });
+
+            const filterSelect = document.getElementById('programmeFilter');
+            if (filterSelect) {
+                filterSelect.innerHTML = '<option value="">All Programmes</option>';
+                allProgrammes.forEach(prog => {
+                    filterSelect.innerHTML += `<option value="${prog.id}">${prog.code}</option>`;
+                });
+            }
+        }
+
+        function populateStudentDropdowns() {
+            const select = document.getElementById('studentId');
+            if (select) {
+                select.innerHTML = '<option value="">Select Student</option>';
+                allStudents.forEach(student => {
+                    select.innerHTML += `<option value="${student.id}">${student.full_name} (${student.reg_no})</option>`;
+                });
+            }
+        }
+
+        function populateCourseDropdowns() {
+            const select = document.getElementById('courseId');
+            if (select) {
+                select.innerHTML = '<option value="">Select Course</option>';
+                allCourses.forEach(course => {
+                    select.innerHTML += `<option value="${course.id}">${course.code} - ${course.title}</option>`;
+                });
+            }
+
+            const filterSelect = document.getElementById('resultCourseFilter');
+            if (filterSelect) {
+                filterSelect.innerHTML = '<option value="">Select Course...</option>';
+                allCourses.forEach(course => {
+                    filterSelect.innerHTML += `<option value="${course.id}">${course.code}</option>`;
+                });
+            }
+        }
+
+        function loadStudentsTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            allStudents.forEach(student => {
+                const programme = allProgrammes.find(p => p.id === student.programme_id);
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${student.reg_no}</td>
+                        <td>${student.full_name}</td>
+                        <td>${programme ? programme.code : 'N/A'}</td>
+                        <td>Year ${student.year_of_study}</td>
+                        <td>${student.email || 'N/A'}</td>
+                        <td><span style="background: #d4edda; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${student.status}</span></td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editStudent(${student.id})">Edit</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function loadCoursesTable() {
+            const tbody = document.getElementById('coursesTableBody');
+            tbody.innerHTML = '';
+
+            allCourses.slice(0, 10).forEach(course => {
+                const programme = allProgrammes.find(p => p.id === course.programme_id);
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${course.code}</td>
+                        <td>${course.title}</td>
+                        <td>${programme ? programme.code : 'N/A'}</td>
+                        <td>${course.credit_units}</td>
+                        <td>${course.lecture_hours || 0}</td>
+                        <td>${course.practical_hours || 0}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function loadStaffTable() {
+            const tbody = document.getElementById('staffTableBody');
+            tbody.innerHTML = '';
+
+            allStaff.forEach(staff => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${staff.staff_no}</td>
+                        <td>${staff.full_name}</td>
+                        <td>${staff.email || 'N/A'}</td>
+                        <td><span style="background: #d1ecf1; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${staff.role}</span></td>
+                        <td>${staff.teaching_days || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function loadResultsTable() {
+            const tbody = document.getElementById('resultsTableBody');
+            tbody.innerHTML = '';
+
+            allResults.slice(0, 20).forEach(result => {
+                const student = allStudents.find(s => s.id === result.student_id);
+                const course = allCourses.find(c => c.id === result.course_id);
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${student ? student.full_name : 'Unknown'}</td>
+                        <td>${course ? course.code : 'Unknown'}</td>
+                        <td>${result.marks ? result.marks.toFixed(2) : 'N/A'}</td>
+                        <td>${result.letter_grade || 'N/A'}</td>
+                        <td>${result.gpa_points || 'N/A'}</td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editResult(${result.id})">Edit</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function loadReports() {
+            // Students per programme
+            let programmeSummary = '';
+            allProgrammes.forEach(prog => {
+                const count = allStudents.filter(s => s.programme_id === prog.id).length;
+                programmeSummary += `<p>${prog.code}: ${count} students</p>`;
+            });
+            document.getElementById('studentsPerProgramme').innerHTML = programmeSummary || '<p>No data</p>';
+
+            // Total results
+            document.getElementById('totalResults').textContent = allResults.length;
+
+            // Average GPA
+            if (allResults.length > 0) {
+                const avgGPA = (allResults.reduce((sum, r) => sum + (r.gpa_points || 0), 0) / allResults.length).toFixed(2);
+                document.getElementById('avgGPA').textContent = avgGPA;
+            }
+
+            // Performance report
+            loadPerformanceReport();
+        }
+
+        function loadPerformanceReport() {
+            const tbody = document.getElementById('performanceTableBody');
+            tbody.innerHTML = '';
+
+            allStudents.slice(0, 10).forEach(student => {
+                const programme = allProgrammes.find(p => p.id === student.programme_id);
+                const studentResults = allResults.filter(r => r.student_id === student.id);
+                const avgMark = studentResults.length > 0 
+                    ? (studentResults.reduce((sum, r) => sum + (r.marks || 0), 0) / studentResults.length).toFixed(2)
+                    : 'N/A';
+                const avgGPA = studentResults.length > 0
+                    ? (studentResults.reduce((sum, r) => sum + (r.gpa_points || 0), 0) / studentResults.length).toFixed(2)
+                    : 'N/A';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${student.full_name}</td>
+                        <td>${programme ? programme.code : 'N/A'}</td>
+                        <td>${studentResults.length}</td>
+                        <td>${avgMark}</td>
+                        <td>${avgGPA}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+
+            document.querySelectorAll('.menu-link').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function openStudentModal() {
+            document.getElementById('studentModal').classList.add('active');
+        }
+
+        function closeStudentModal() {
+            document.getElementById('studentModal').classList.remove('active');
+            document.getElementById('studentForm').reset();
+        }
+
+        function openResultModal() {
+            document.getElementById('resultModal').classList.add('active');
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.remove('active');
+            document.getElementById('resultForm').reset();
+        }
+
+        async function saveStudent(e) {
+            e.preventDefault();
+            
+            try {
+                const newStudent = {
+                    reg_no: document.getElementById('regNo').value,
+                    full_name: document.getElementById('fullName').value,
+                    email: document.getElementById('studentEmail').value,
+                    phone: document.getElementById('phone').value,
+                    programme_id: parseInt(document.getElementById('programmeId').value),
+                    gender: document.getElementById('gender').value,
+                    year_of_study: parseInt(document.getElementById('yearOfStudy').value),
+                    semester: parseInt(document.getElementById('semester').value),
+                    enrollment_year: new Date().getFullYear(),
+                    status: 'active'
+                };
+
+                const { data, error } = await supabase.from('students').insert([newStudent]);
+                
+                if (error) throw error;
+
+                showMessage('Student added successfully!', 'success');
+                closeStudentModal();
+                await loadAllData();
+            } catch (error) {
+                showMessage('Error saving student: ' + error.message, 'error');
+            }
+        }
+
+        async function saveResult(e) {
+            e.preventDefault();
+
+            try {
+                const marks = parseFloat(document.getElementById('marks').value);
+                let letterGrade = 'F';
+                let gpaPoints = 0;
+
+                if (marks >= 80) { letterGrade = 'A'; gpaPoints = 5.0; }
+                else if (marks >= 75) { letterGrade = 'B+'; gpaPoints = 4.5; }
+                else if (marks >= 70) { letterGrade = 'B'; gpaPoints = 4.0; }
+                else if (marks >= 65) { letterGrade = 'C+'; gpaPoints = 3.5; }
+                else if (marks >= 60) { letterGrade = 'C'; gpaPoints = 3.0; }
+                else if (marks >= 55) { letterGrade = 'D+'; gpaPoints = 2.5; }
+                else if (marks >= 50) { letterGrade = 'D'; gpaPoints = 2.0; }
+
+                const newResult = {
+                    student_id: parseInt(document.getElementById('studentId').value),
+                    course_id: parseInt(document.getElementById('courseId').value),
+                    marks: marks,
+                    letter_grade: letterGrade,
+                    gpa_points: gpaPoints,
+                    semester_id: parseInt(document.getElementById('resultSemester').value),
+                    is_published: false
+                };
+
+                const { error } = await supabase.from('results').insert([newResult]);
+                
+                if (error) throw error;
+
+                showMessage('Result added successfully!', 'success');
+                closeResultModal();
+                await loadAllData();
+            } catch (error) {
+                showMessage('Error saving result: ' + error.message, 'error');
+            }
+        }
+
+        function searchStudents() {
+            const query = document.getElementById('studentSearch').value.toLowerCase();
+            const filtered = allStudents.filter(s => 
+                s.full_name.toLowerCase().includes(query) || 
+                s.reg_no.toLowerCase().includes(query)
+            );
+
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            filtered.forEach(student => {
+                const programme = allProgrammes.find(p => p.id === student.programme_id);
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${student.reg_no}</td>
+                        <td>${student.full_name}</td>
+                        <td>${programme ? programme.code : 'N/A'}</td>
+                        <td>Year ${student.year_of_study}</td>
+                        <td>${student.email || 'N/A'}</td>
+                        <td><span style="background: #d4edda; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${student.status}</span></td>
+                        <td>
+                            <button class="btn-small btn-edit">Edit</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filterCourses() {
+            const progId = document.getElementById('programmeFilter').value;
+            const filtered = progId ? allCourses.filter(c => c.programme_id === parseInt(progId)) : allCourses;
+
+            const tbody = document.getElementById('coursesTableBody');
+            tbody.innerHTML = '';
+
+            filtered.slice(0, 10).forEach(course => {
+                const programme = allProgrammes.find(p => p.id === course.programme_id);
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${course.code}</td>
+                        <td>${course.title}</td>
+                        <td>${programme ? programme.code : 'N/A'}</td>
+                        <td>${course.credit_units}</td>
+                        <td>${course.lecture_hours || 0}</td>
+                        <td>${course.practical_hours || 0}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filterResults() {
+            let filtered = allResults;
+
+            const courseId = document.getElementById('resultCourseFilter').value;
+            if (courseId) {
+                filtered = filtered.filter(r => r.course_id === parseInt(courseId));
+            }
+
+            const tbody = document.getElementById('resultsTableBody');
+            tbody.innerHTML = '';
+
+            filtered.slice(0, 20).forEach(result => {
+                const student = allStudents.find(s => s.id === result.student_id);
+                const course = allCourses.find(c => c.id === result.course_id);
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${student ? student.full_name : 'Unknown'}</td>
+                        <td>${course ? course.code : 'Unknown'}</td>
+                        <td>${result.marks ? result.marks.toFixed(2) : 'N/A'}</td>
+                        <td>${result.letter_grade || 'N/A'}</td>
+                        <td>${result.gpa_points || 'N/A'}</td>
+                        <td>
+                            <button class="btn-small btn-edit">Edit</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function searchStaff() {
+            const query = document.getElementById('staffSearch').value.toLowerCase();
+            const filtered = allStaff.filter(s => s.full_name.toLowerCase().includes(query));
+
+            const tbody = document.getElementById('staffTableBody');
+            tbody.innerHTML = '';
+
+            filtered.forEach(staff => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${staff.staff_no}</td>
+                        <td>${staff.full_name}</td>
+                        <td>${staff.email || 'N/A'}</td>
+                        <td><span style="background: #d1ecf1; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${staff.role}</span></td>
+                        <td>${staff.teaching_days || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function showMessage(message, type) {
+            const element = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+            element.textContent = message;
+            element.classList.add('show');
+            setTimeout(() => element.classList.remove('show'), 3000);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'https://faes-mis.github.io/faes-mis-frontend';
+            }
+        }
+    </script>
+</body>
+</html>

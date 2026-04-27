@@ -545,6 +545,17 @@
 
                 const student = students[0];
 
+                // Demo mode: Accept any password if no password is set
+                if (!student.password_hash) {
+                    // No password set - accept any input (demo mode)
+                    if (!password) {
+                        throw new Error('Please enter a password');
+                    }
+                } else {
+                    // Password is set - would need to verify (not implemented for demo)
+                    throw new Error('Password verification not yet implemented');
+                }
+
                 // Store student data
                 localStorage.setItem('studentData', JSON.stringify(student));
 

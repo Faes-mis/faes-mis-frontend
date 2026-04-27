@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAES MIS - Student Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.0"></script>
     <style>
         * {
             margin: 0;
@@ -504,9 +505,10 @@
     </div>
 
     <script>
-        // Supabase Configuration
+        // Initialize Supabase
         const SUPABASE_URL = 'https://ikvepnyyrunraitvekat.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrdmVwbnl5cnVucmFpdHZla2F0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk0NTk1NzAsImV4cCI6MTkzNzAzNTU3MH0.8N8WBwx28wDEVFc__4qJ7V7eNDvYIzFOCf8WBpJMC3A';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // DOM Elements
         const loginPage = document.getElementById('loginPage');
@@ -516,28 +518,6 @@
         const errorMessage = document.getElementById('errorMessage');
         const loading = document.getElementById('loading');
         const loginBtn = document.getElementById('loginBtn');
-
-        // Supabase API Helper
-        async function supabaseQuery(table, filters = {}) {
-            let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
-            
-            Object.keys(filters).forEach((key, index) => {
-                url += `&${key}=eq.${encodeURIComponent(filters[key])}`;
-            });
-
-            const response = await fetch(url, {
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Supabase query failed: ${response.statusText}`);
-            }
-
-            return await response.json();
-        }
 
         // Login Handler
         loginForm.addEventListener('submit', async (e) => {
@@ -552,9 +532,14 @@
 
             try {
                 // Query student by registration number
-                const students = await supabaseQuery('students', { reg_no: regNo });
+                const { data: students, error } = await supabase
+                    .from('students')
+                    .select('*')
+                    .eq('reg_no', regNo);
 
-                if (students.length === 0) {
+                if (error) throw error;
+
+                if (!students || students.length === 0) {
                     throw new Error('Invalid registration number or password');
                 }
 
@@ -572,6 +557,7 @@
             } catch (error) {
                 errorMessage.textContent = error.message || 'Login failed. Please try again.';
                 errorMessage.classList.add('show');
+                console.error('Login error:', error);
             } finally {
                 loading.classList.remove('show');
                 loginBtn.disabled = false;
@@ -591,7 +577,14 @@
             document.getElementById('studentName').textContent = student.full_name.split(' ')[0];
             document.getElementById('profileRegNo').textContent = student.reg_no;
             document.getElementById('profileName').textContent = student.full_name;
-            document.getElementById('profileProgramme').textContent = student.programme || 'N/A';
+            
+            // Get programme name
+            const { data: prog } = await supabase
+                .from('programmes')
+                .select('code')
+                .eq('id', student.programme_id);
+            
+            document.getElementById('profileProgramme').textContent = prog ? prog[0].code : 'N/A';
             document.getElementById('profileYear').textContent = `Year ${student.year_of_study}`;
             document.getElementById('profileSemester').textContent = `Semester ${student.semester}`;
             document.getElementById('profileEmail').textContent = student.email || 'N/A';
@@ -606,7 +599,14 @@
         // Load Courses
         async function loadCourses(programmeId) {
             try {
-                const courses = await supabaseQuery('courses', { programme_id: programmeId });
+                const { data: courses, error } = await supabase
+                    .from('courses')
+                    .select('*')
+                    .eq('programme_id', programmeId)
+                    .limit(6);
+
+                if (error) throw error;
+
                 const coursesContainer = document.getElementById('coursesContainer');
 
                 if (!courses || courses.length === 0) {
@@ -614,7 +614,7 @@
                     return;
                 }
 
-                coursesContainer.innerHTML = courses.slice(0, 6).map(course => `
+                coursesContainer.innerHTML = courses.map(course => `
                     <div class="course-card">
                         <h4>${course.title}</h4>
                         <p><strong>${course.code}</strong></p>
@@ -633,7 +633,13 @@
         // Load Results
         async function loadResults(studentId) {
             try {
-                const results = await supabaseQuery('results', { student_id: studentId });
+                const { data: results, error } = await supabase
+                    .from('results')
+                    .select('*')
+                    .eq('student_id', studentId);
+
+                if (error) throw error;
+
                 const resultsContainer = document.getElementById('resultsContainer');
 
                 if (!results || results.length === 0) {
